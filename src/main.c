@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,7 +59,10 @@ char *replace_vars(const char *line, const EnvMap *envs) {
             if (!end) break;
 
             char key[64] = {0};
-            strncpy(key, start, end - start);
+            size_t key_len = end - start;
+            if (key_len >= sizeof(key)) key_len = sizeof(key) - 1;
+            strncpy(key, start, key_len);
+            key[key_len] = '\0';
 
             const char *replacement = getenv(key); // fallback to system env
             for (size_t j = 0; j < envs->count; j++) {
